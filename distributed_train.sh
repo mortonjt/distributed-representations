@@ -8,14 +8,14 @@
 #SBATCH --ntasks=4
 #SBATCH --cpus-per-task 40
 #SBATCH --time=100:00:00
-#SBATCH -N 4
+#SBATCH -N 2
 #SBATCH -p gpu
 #SBATCH --gres=gpu:4
 #SBATCH --exclusive
 
 # see https://www.glue.umd.edu/hpcc/help/software/pytorch.html#distrib
 
-ip=`curl ifconfig.me`
+# ip=`curl ifconfig.me`
 
 module load cuda/10.1.105_418.39
 module load cudnn/v7.6.2-cuda-10.1
@@ -87,14 +87,29 @@ RANK=0
 #port=`echo $MPORT | awk '{print $'$((RANK+1))'}'`
 #port=4000
 #echo $port
-
+NPROC_PER_NODE=2
+SLURM_JOB_NUM_NODES=4
 for node in $HOSTLIST
 do
     #ssh -q $node \
-    srun ~/venvs/roberta/bin/python -m torch.distributed.launch \
+    srun python -m torch.distributed.launch \
     --nproc_per_node=$NPROC_PER_NODE --nnodes=$SLURM_JOB_NUM_NODES \
     --node_rank=$RANK --master_addr="$MASTER" --master_port="$MPORT" \
-    $COMMAND &
+    $(which fairseq-train) $DATA_DIR \
+    --task masked_lm --criterion masked_lm \
+    --sample-break-mode complete --tokens-per-sample $TOKENS_PER_SAMPLE \
+    --optimizer adam --adam-betas '(0.9,0.98)' --adam-eps 1e-6 --clip-norm 0.0 \
+    --lr-scheduler polynomial_decay --lr $PEAK_LR --warmup-updates $WARMUP_UPDATES --total-num-update $TOTAL_UPDATES \
+    --dropout 0.1 --attention-dropout 0.1 --weight-decay 0.01 \
+    --max-sentences $MAX_SENTENCES --update-freq $UPDATE_FREQ \
+    --max-update $TOTAL_UPDATES --log-format simple --log-interval 100 \
+    --ddp-backend=no_c10d \
+    --arch gert \
+    --tensorboard-logdir $TB_DIR \
+    --bpe gpt2 --memory-efficient-fp16 \
+    --num-workers $NPROC_PER_NODE \
+    --save-interval-updates 300 \
+    --save-dir $SAVE_DIR &
     RANK=$((RANK+1))
 done
 wait
