@@ -1,4 +1,4 @@
-#!/bin/bash
+0;95;0c#!/bin/bash
 #
 #SBATCH --job-name=roberta
 #SBATCH --output=stdout.txt
@@ -27,6 +27,7 @@ module load nccl/2.4.2-cuda-10.1
 # TODO: Change environment if necessary
 source ~/venvs/roberta/bin/activate
 
+# TODO: These 3 paths below are critical, you may want to change those
 DATA_DIR=/mnt/home/mgt/data/uniref50
 SAVE_DIR=/mnt/home/jmorton/research/gert/roberta-checkpoints/uniref50-test
 TB_DIR=/mnt/home/jmorton/research/gert/roberta-checkpoints/tensorboard
