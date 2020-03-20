@@ -163,3 +163,6 @@ doc/source/generated
 
 # OSX files
 .DS_Store
+
+# we don't need this!
+.pem
