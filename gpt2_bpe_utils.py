@@ -109,7 +109,7 @@ class Encoder:
     #         token = ''.join(self.byte_encoder[b] for b in token.encoder('utf-8'))
     #         bpe_tokens.extend(self.encoder[bpe_token] for bpe_token in self.bpe(token).split(' '))
     #     return bpe_tokens
-    # 
+    #
     # def decode(self, tokens):
     #     text = ''.join([self.decoder[token] for token in tokens])
     #     text = bytearray([self.byte_decoder[c] for c in text]).decode('utf-8', errors=self.errors)
@@ -119,7 +119,8 @@ class Encoder:
         bpe_tokens = []
         text = text.replace('.', '') # remove .
         for token in text.split(' '):
-            bpe_tokens.append(self.encoder[token])
+            if token in self.encoder:
+                bpe_tokens.append(self.encoder[token])
         return bpe_tokens
 
     def decode(self, tokens):
