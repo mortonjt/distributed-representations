@@ -28,5 +28,7 @@ python -m torch.distributed.launch \
     --distributed-no-spawn \
     --distributed-port $MPORT \
     --distributed-world-size $WORLDSIZE \
-    --save-dir $SAVE_DIR
+    --save-dir $SAVE_DIR \
+    --all-gather-list-size 1048576
+    
 
